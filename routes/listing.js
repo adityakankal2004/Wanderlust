@@ -6,7 +6,8 @@ const ExpressError = require("../utils/ExpressError.js");
 const Listing = require("../models/listing.js");
 const validateMongoId = require("../utils/mongoValidator.js");
 const {isLoggedIn , isOwner,isReviewAuthor} = require("../middleware.js");
-
+const multer = require("multer");
+const upload = multer({dest:"uploads/"});
 //Index route
 router.get("/",(async (req,res)=>{
     const allListings = await Listing.find({});
@@ -19,8 +20,8 @@ router.get("/new",isLoggedIn,(req,res)=>{
 });
 
 //Create Route
-router.post("/",isLoggedIn,wrapAsync(async (req,res,next)=>{
-  
+router.post("/",isLoggedIn,wrapAsync,upload.single("listing[image]"),(async (req,res,next)=>{
+    res.send(req.file);
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
     await newListing.save();
